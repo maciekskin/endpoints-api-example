@@ -54,14 +54,18 @@
             </form>
         </div>
 
-        <div class="list"
-            ng-repeat="show in main.tvshows">
-            <div class="element">
-                <span>Name: {{show.name}}</span>
-                <span>Rate: {{show.rate}}</span>
-                <span>Added: {{show.date}}</span>
-            </div>
-        </div>
+        <table class="table table-striped" ng-show="main.tvshows">
+            <tr>
+                <th class="col-md-6">Name</th>
+                <th class="col-md-2">Rate</th>
+                <th class="col-md-4 text-right">Added</th>
+            </tr>
+            <tr ng-repeat="show in main.tvshows">
+                <td>{{show.name}}</td>
+                <td>{{show.rate}}</td>
+                <td class="text-right">{{show.date}}</td>
+            </tr>
+        </table>
     </div>
 </div>
 <script src="https://apis.google.com/js/client.js?onload=init"></script>
