@@ -11,8 +11,12 @@ app.controller('MainController', ['$scope', '$window', function ($scope, $window
     main.tvshows = [];
     main.tvshow = {};
 
-    main.get_list = function() {
-        gapi.client.tvshows.tvshows.list().execute(function(resp) {
+    main.get_list = function(order) {
+        order = order || 'date';
+        var query = {
+            order: order
+        };
+        gapi.client.tvshows.tvshows.list(query).execute(function(resp) {
             if (!resp.code) {
                 $scope.$apply(function() {
                     main.tvshows = resp.items;

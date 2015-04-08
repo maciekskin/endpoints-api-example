@@ -9,6 +9,8 @@ handlers:
   static_dir: static/js
 - url: /bootstrap
   static_dir: static/bootstrap
+- url: /css
+  static_dir: static/css
 - url: /
   static_files: templates/index.html
   upload: templates/index\.html

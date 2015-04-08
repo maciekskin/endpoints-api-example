@@ -21,11 +21,12 @@ from protorpc import messages
 
 class ListRequest(messages.Message):
     """ProtoRPC message definition to represent a TV Shows list query."""
-    limit = messages.IntegerField(1, default=10)
+    limit = messages.IntegerField(1, default=50)
     class Order(messages.Enum):
-        WHEN = 1
-        NAME = 2
-    order = messages.EnumField(Order, 2, default=Order.WHEN)
+        NAME = 1
+        RATE = 2
+        DATE = 3
+    order = messages.EnumField(Order, 2, default=Order.DATE)
 
 
 class GetRequestMessage(messages.Message):

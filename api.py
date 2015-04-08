@@ -79,7 +79,9 @@ class TvShowsApi(remote.Service):
         query = TvShow.query_current_user()
         if request.order == ListRequest.Order.NAME:
             query = query.order(TvShow.name)
-        elif request.order == ListRequest.Order.WHEN:
+        elif request.order == ListRequest.Order.RATE:
+            query = query.order(-TvShow.rate)
+        elif request.order == ListRequest.Order.DATE:
             query = query.order(-TvShow.date)
         items = [entity.to_message() for entity in query.fetch(request.limit)]
         return ListResponse(items=items)
