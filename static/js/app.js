@@ -22,6 +22,9 @@ app.controller('MainController', ['$scope', '$window', function ($scope, $window
                     main.tvshows = resp.items;
                 });
             }
+            else {
+                alert('Error connecting to backend!');
+            }
         });
     }
 
@@ -32,6 +35,9 @@ app.controller('MainController', ['$scope', '$window', function ($scope, $window
                     main.tvshow = {};
                     main.get_list();
                 });
+            }
+            else {
+                alert('Error connecting to backend!');
             }
         });
     }
@@ -47,6 +53,9 @@ app.controller('MainController', ['$scope', '$window', function ($scope, $window
                             main.authorized = true;
                             main.get_list();
                         });
+                    }
+                    else {
+                        alert('Error connecting to backend!');
                     }
                 });
             });

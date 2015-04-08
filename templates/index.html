@@ -12,17 +12,18 @@
     <input
         ng-hide="main.authorized"
         ng-click="main.signin(false)"
-        class="btn btn-small" value="Sign In!" />
+        class="btn btn-small pull-right" value="Sign In!" />
     <input
         ng-show="main.authorized"
         ng-click="main.signout()"
-        class="btn btn-small" value="Sign Out!" />
+        class="btn btn-small pull-right" value="Sign Out." />
+    <div class="clearfix"></div>
 
     <div class="container"
          ng-show="main.authorized">
         <div class="form">
             <form name="addForm" ng-submit="main.insert()">
-                <h4>Add new TV Show to your favourite list...</h4>
+                <h4>Add new TV Show to your favourite list!</h4>
                 <fieldset class="form-group">
                     <select ng-model="main.tvshow.rate"
                             ng-options="stars for stars in [5,4,3,2,1]"
