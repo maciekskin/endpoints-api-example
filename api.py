@@ -55,7 +55,7 @@ class TvShowsApi(remote.Service):
         # TODO: validate if user owns tvshow?
         entity = TvShow.get_by_id(request.id)
         if not entity:
-            raise endpoints.NotFoundException('Greeting %s not found.' %
+            raise endpoints.NotFoundException('TV Show %s not found.' %
                                             (request.id,))
         return entity.to_message()
 
