@@ -46,15 +46,15 @@ class TvShow(ndb.Model):
         This is necessary so the entity can be returned in an API request.
 
         Returns:
-            An instance of TvShowsResponseMessage with the ID set to the datastore
-            ID of the current entity, the name simply the entity's name
-            value and the date value equal to the string version of date
+            An instance of TvShowsResponseMessage with the ID set to the
+            datastore ID of the current entity, the name value
+            and the date value equal to the string version of date
             from the property 'date_str'.
         """
         return TvShowResponseMessage(id=self.key.id(),
-                                    name=self.name,
-                                    rate=self.rate,
-                                    date=self.date_str)
+                                     name=self.name,
+                                     rate=self.rate,
+                                     date=self.date_str)
 
     @staticmethod
     def get_current_user():

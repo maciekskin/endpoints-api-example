@@ -13,8 +13,6 @@
 # limitations under the License.
 
 import endpoints
-from protorpc import messages
-from protorpc import message_types
 from protorpc import remote
 
 from messages import (
@@ -26,7 +24,8 @@ from messages import (
 )
 from models import TvShow
 
-CLIENT_ID = "603902234563-lp0ujjsr874tcla49dpcqngahhc745vo.apps.googleusercontent.com"
+CLIENT_ID = "603902234563-lp0ujjsr874tcla49dpcqngahhc745vo"\
+            ".apps.googleusercontent.com"
 
 
 @endpoints.api(name='tvshows',
@@ -56,7 +55,7 @@ class TvShowsApi(remote.Service):
         entity = TvShow.get_by_id(request.id)
         if not entity:
             raise endpoints.NotFoundException('TV Show %s not found.' %
-                                            (request.id,))
+                                              (request.id,))
         return entity.to_message()
 
     @endpoints.method(ListRequest, ListResponse,
@@ -97,7 +96,7 @@ class TvShowsApi(remote.Service):
                 request.
 
         Returns:
-            An instance of TvShowResponseMessage containing the TV Show inserted,
+            An instance of TvShowResponseMessage containing inserted Show,
             the name, the time the TV Show was inserted and the ID.
         """
         entity = TvShow.put_from_message(request)

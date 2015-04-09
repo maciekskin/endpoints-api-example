@@ -22,6 +22,7 @@ from protorpc import messages
 class ListRequest(messages.Message):
     """ProtoRPC message definition to represent a TV Shows list query."""
     limit = messages.IntegerField(1, default=50)
+
     class Order(messages.Enum):
         NAME = 1
         RATE = 2
