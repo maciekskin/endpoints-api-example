@@ -1,93 +1,61 @@
 'use strict';
 
 var app = angular.module('TvShows', []);
-var CLIENT_ID = '603902234563-lp0ujjsr874tcla49dpcqngahhc745vo.apps.googleusercontent.com';
-var SCOPES = ['https://www.googleapis.com/auth/userinfo.email'];
 
-app.controller('MainController', ['$scope', '$window', function ($scope, $window) {
+app.controller('MainController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
     var main = this;
-    main.is_backend_ready = false;
     main.authorized = false;
     main.tvshows = [];
     main.tvshow = {};
+    main.user = {};
 
     main.get_list = function(order) {
-        order = order || 'date';
-        var query = {
-            order: order
-        };
-        gapi.client.tvshows.tvshows.list(query).execute(function(resp) {
-            if (!resp.code) {
-                $scope.$apply(function() {
-                    main.tvshows = resp.items;
+        order = order || 'DATE';
+        $http({method: 'GET', url: '/_ah/api/tvshows/v1/tvshows?order='+order,
+               headers: {'Authorization': 'Bearer ' + $window.sessionStorage.token}}).success(function(resp) {
+                    main.tvshows = resp.data.items;
+                }).error(function() {
+                    alert('Error, cannot get list, please try again.');
                 });
-            }
-            else {
-                alert('Error connecting to backend!');
-            }
-        });
     }
 
     main.insert = function() {
-        gapi.client.tvshows.tvshows.insert(main.tvshow).execute(function(resp) {
-            if (!resp.code) {
-                $scope.$apply(function() {
+        $http({method: 'POST', url: '/_ah/api/tvshows/v1/tvshows',
+               data: main.tvshow,
+               headers: {'Authorization': 'Bearer ' + $window.sessionStorage.token}}).success(function(resp) {
                     main.tvshow = {};
                     main.get_list();
+                }).error(function() {
+                    alert('Error, element not inserted, please try again.');
                 });
-            }
-            else {
-                alert('Error connecting to backend!');
-            }
+    }
+
+    main.signin = function() {
+        $http({method: 'POST', url: '/_ah/api/tvshows/v1/users/login',
+               data: main.user}).success(function(resp) {
+                $window.sessionStorage.token = resp.data.token;
+                main.user = {};
+                main.authorized = true;
+                main.get_list();
+        }).error(function() {
+            alert('Error, cannot log in, please try again.');
         });
     }
 
-    main.signin = function(mode) {
-        gapi.auth.authorize({client_id: CLIENT_ID,
-            scope: SCOPES,
-            immediate: mode},
-            function() {
-                gapi.client.oauth2.userinfo.get().execute(function(resp) {
-                    if (!resp.code) {
-                        $scope.$apply(function() {
-                            main.authorized = true;
-                            main.get_list();
-                        });
-                    }
-                    else {
-                        alert('Error connecting to backend!');
-                    }
-                });
-            });
+    main.signon = function() {
+        $http({method: 'POST', url: '/_ah/api/tvshows/v1/users/register',
+              data: main.user}).success(function(resp) {
+                main.user = {};
+                alert('Account created successfuly, please log in.');
+        }).error(function() {
+            alert('Error, account not created, please try again.');
+        });
     }
-    
+
     main.signout = function() {
-       gapi.auth.setToken(null);
-       main.authorized = false; 
+        $window.sessionStorage.token = '';
+        main.authorized = false;
+        main.tvshows = {};
+        main.tvshow = {};
     }
-
-    $scope.load_tvshows_lib = function() {
-        var apisToLoad;
-        var loadCallback = function() {
-            if (--apisToLoad == 0) {
-                $scope.$apply(function() {
-                    main.is_backend_ready = true;
-                    main.signin(true);
-                });
-            }
-        };
-
-        apisToLoad = 2;
-        gapi.client.load('tvshows', 'v1', loadCallback, '//' + window.location.host + '/_ah/api');
-        gapi.client.load('oauth2', 'v2', loadCallback);
-    }
-
-    $window.init = function() {
-        $scope.$apply($scope.load_tvshows_lib);
-    };
-
 }]);
-
-function init() {
-    window.init();
-}

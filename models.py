@@ -20,11 +20,16 @@ provides a method for returning a 401 Unauthorized when no current user can be
 determined.
 """
 
+import hmac
 
 import endpoints
 from google.appengine.ext import ndb
 
 from messages import TvShowResponseMessage
+from utils import sha256_encode
+
+
+SALT = '3fee87186b278c1d1c62d50ea9be011d89f050e619fc6abb0908e4168891356a'
 
 
 class TvShow(ndb.Model):
@@ -33,7 +38,7 @@ class TvShow(ndb.Model):
     name = ndb.StringProperty(required=True)
     rate = ndb.IntegerProperty(required=True)
     date = ndb.DateTimeProperty(auto_now_add=True)
-    user = ndb.UserProperty(required=True)
+    user = ndb.StringProperty(required=False)
 
     @property
     def date_str(self):
@@ -56,15 +61,8 @@ class TvShow(ndb.Model):
                                      rate=self.rate,
                                      date=self.date_str)
 
-    @staticmethod
-    def get_current_user():
-        current_user = endpoints.get_current_user()
-        if current_user is None:
-            raise endpoints.UnauthorizedException('Invalid token.')
-        return current_user
-
     @classmethod
-    def put_from_message(cls, message):
+    def put_from_message(cls, message, user_email):
         """Gets the current user and inserts a TV Show.
 
         Args:
@@ -73,19 +71,47 @@ class TvShow(ndb.Model):
         Returns:
             The TV Show entity that was inserted.
         """
-        current_user = cls.get_current_user()
+        current_user = User.get_current_user(user_email, check_password=False)
         entity = cls(name=message.name, rate=message.rate,
-                     user=current_user)
+                     user=current_user.email)
         entity.put()
         return entity
 
     @classmethod
-    def query_current_user(cls):
+    def query_user(cls, user_email):
         """Creates a query for the TvShows of the current user.
 
         Returns:
             An ndb.Query object bound to the current user. This can be used
             to filter for other properties or order by them.
         """
-        current_user = cls.get_current_user()
-        return cls.query(cls.user == current_user)
+        current_user = User.get_current_user(user_email, check_password=False)
+        return cls.query(cls.user == current_user.email)
+
+
+class User(ndb.Model):
+    email = ndb.StringProperty(required=True)
+    password = ndb.StringProperty(required=False)
+
+    def validate_password(self, password):
+        return hmac.compare_digest(self.password.encode('utf-8'),
+                                   sha256_encode(SALT, password))
+
+    def set_password(self, password):
+        self.password = sha256_encode(SALT, password)
+
+    @classmethod
+    def put_from_message(cls, message):
+        entity = cls(email=message.email)
+        entity.set_password(message.password)
+        entity.put()
+        return entity
+
+    @classmethod
+    def get_current_user(cls, email, password='', check_password=True):
+        entity = cls.query(cls.email == email).get()
+        if not entity:
+            raise endpoints.UnauthorizedException('User not found.')
+        if check_password and not entity.validate_password(password):
+            raise endpoints.UnauthorizedException('Invalid user or password.')
+        return entity

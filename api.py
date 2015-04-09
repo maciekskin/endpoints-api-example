@@ -12,28 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 import endpoints
 from protorpc import remote
 
 from messages import (
-    ListRequest,
     GetRequestMessage,
     InsertRequestMessage,
+    ListRequest,
+    ListResponse,
     TvShowResponseMessage,
-    ListResponse
+    UserRequestMessage,
+    RegisterResponseMessage,
+    LoginResponseMessage
 )
-from models import TvShow
-
-CLIENT_ID = "603902234563-lp0ujjsr874tcla49dpcqngahhc745vo"\
-            ".apps.googleusercontent.com"
+from models import TvShow, User
+from utils import JWTHelper
 
 
 @endpoints.api(name='tvshows',
-               version='v1',
-               allowed_client_ids=[
-                   CLIENT_ID,
-                   endpoints.API_EXPLORER_CLIENT_ID
-               ])
+               version='v1')
 class TvShowsApi(remote.Service):
     """TvShows API v1"""
 
@@ -75,7 +74,10 @@ class TvShowsApi(remote.Service):
             most recent to least recent. If the API request specifies an order
             of NAME, the results are ordered by the name value of the TV Shows.
         """
-        query = TvShow.query_current_user()
+        header = os.environ.get('HTTP_AUTHORIZATION', '')
+        token = header.split(' ')[-1]
+        payload = JWTHelper.validate_jwt_token(token)
+        query = TvShow.query_user(payload['email'])
         if request.order == ListRequest.Order.NAME:
             query = query.order(TvShow.name)
         elif request.order == ListRequest.Order.RATE:
@@ -99,8 +101,47 @@ class TvShowsApi(remote.Service):
             An instance of TvShowResponseMessage containing inserted Show,
             the name, the time the TV Show was inserted and the ID.
         """
-        entity = TvShow.put_from_message(request)
+        header = os.environ.get('HTTP_AUTHORIZATION', '')
+        token = header.split(' ')[-1]
+        payload = JWTHelper.validate_jwt_token(token)
+        entity = TvShow.put_from_message(request, payload['email'])
         return entity.to_message()
+
+    @endpoints.method(UserRequestMessage, RegisterResponseMessage,
+                      path='users/register', http_method='POST',
+                      name='users.signon')
+    def user_signon(self, request):
+        """Exposes an API endpoint to insert new user.
+
+        Args:
+            request: An instance of UserRequestMessage parsed from the API
+                request.
+
+        Returns:
+            An instance of UserResponseMessage containing new user email.
+        """
+        entity = User.put_from_message(request)
+        return RegisterResponseMessage(email=entity.email)
+
+    @endpoints.method(UserRequestMessage, LoginResponseMessage,
+                      path='users/login', http_method='POST',
+                      name='users.signin')
+    def user_signin(self, request):
+        """Exposes an API endpoint to insert new user.
+
+        Args:
+            request: An instance of UserRequestMessage parsed from the API
+                request.
+
+        Returns:
+            An instance of LoginResponseMessage containing new user email
+            and JWT token.
+        """
+        entity = User.get_current_user(request.email, request.password)
+        payload = {'email': entity.email}
+        token = JWTHelper.get_jwt_token(payload)
+        return LoginResponseMessage(email=entity.email,
+                                    token=token)
 
 
 APPLICATION = endpoints.api_server([TvShowsApi])

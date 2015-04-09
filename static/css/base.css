@@ -6,3 +6,6 @@ body {
 table th {
     cursor: pointer;
 }
+input {
+    margin: 5px;
+}

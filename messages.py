@@ -52,3 +52,17 @@ class TvShowResponseMessage(messages.Message):
 class ListResponse(messages.Message):
     """ProtoRPC message definition to represent a list of stored TV Shows."""
     items = messages.MessageField(TvShowResponseMessage, 1, repeated=True)
+
+
+class UserRequestMessage(messages.Message):
+    email = messages.StringField(1)
+    password = messages.StringField(2)
+
+
+class LoginResponseMessage(messages.Message):
+    email = messages.StringField(1)
+    token = messages.StringField(2)
+
+
+class RegisterResponseMessage(messages.Message):
+    email = messages.StringField(1)
