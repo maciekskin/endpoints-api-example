@@ -20,8 +20,6 @@ provides a method for returning a 401 Unauthorized when no current user can be
 determined.
 """
 
-import hmac
-
 import endpoints
 from google.appengine.ext import ndb
 
@@ -94,8 +92,7 @@ class User(ndb.Model):
     password = ndb.StringProperty(required=False)
 
     def validate_password(self, password):
-        return hmac.compare_digest(self.password.encode('utf-8'),
-                                   sha256_encode(SALT, password))
+        return self.password.encode('utf-8') == sha256_encode(SALT, password)
 
     def set_password(self, password):
         self.password = sha256_encode(SALT, password)

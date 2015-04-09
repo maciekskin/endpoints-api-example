@@ -12,8 +12,8 @@ app.controller('MainController', ['$scope', '$http', '$window', function ($scope
     main.get_list = function(order) {
         order = order || 'DATE';
         $http({method: 'GET', url: '/_ah/api/tvshows/v1/tvshows?order='+order,
-               headers: {'Authorization': 'Bearer ' + $window.sessionStorage.token}}).success(function(resp) {
-                    main.tvshows = resp.data.items;
+               headers: {'Authorization': 'Bearer ' + $window.sessionStorage.token}}).success(function(data) {
+                    main.tvshows = data.items;
                 }).error(function() {
                     alert('Error, cannot get list, please try again.');
                 });
@@ -22,7 +22,7 @@ app.controller('MainController', ['$scope', '$http', '$window', function ($scope
     main.insert = function() {
         $http({method: 'POST', url: '/_ah/api/tvshows/v1/tvshows',
                data: main.tvshow,
-               headers: {'Authorization': 'Bearer ' + $window.sessionStorage.token}}).success(function(resp) {
+               headers: {'Authorization': 'Bearer ' + $window.sessionStorage.token}}).success(function(data) {
                     main.tvshow = {};
                     main.get_list();
                 }).error(function() {
@@ -32,8 +32,8 @@ app.controller('MainController', ['$scope', '$http', '$window', function ($scope
 
     main.signin = function() {
         $http({method: 'POST', url: '/_ah/api/tvshows/v1/users/login',
-               data: main.user}).success(function(resp) {
-                $window.sessionStorage.token = resp.data.token;
+               data: main.user}).success(function(data) {
+                $window.sessionStorage.token = data.token;
                 main.user = {};
                 main.authorized = true;
                 main.get_list();
@@ -44,7 +44,7 @@ app.controller('MainController', ['$scope', '$http', '$window', function ($scope
 
     main.signon = function() {
         $http({method: 'POST', url: '/_ah/api/tvshows/v1/users/register',
-              data: main.user}).success(function(resp) {
+              data: main.user}).success(function(data) {
                 main.user = {};
                 alert('Account created successfuly, please log in.');
         }).error(function() {

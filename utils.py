@@ -55,7 +55,7 @@ class JWTHelper(object):
     def validate_jwt_token(cls, token):
         try:
             payload, signing_input, header, signature = cls._load_jwt(token)
-        except ValueError:
+        except (ValueError, AttributeError):
             raise endpoints.UnauthorizedException('Invalid token.')
         if not cls._verify_signature(payload, signing_input,
                                      header, signature):
@@ -65,7 +65,7 @@ class JWTHelper(object):
     @classmethod
     def _verify_signature(cls, payload, signing_input, header, signature):
         valid_sign = sha256_encode(SECRET_KEY, signing_input)
-        return hmac.compare_digest(signature, valid_sign)
+        return signature == valid_sign
 
     @classmethod
     def _load_jwt(cls, token):
